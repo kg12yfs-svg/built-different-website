@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Built Different</title>
+<style>
+  /* ----- GLOBAL STYLES ----- */
+  body {
+    margin:0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #0B1C2D;
+    color: #F5F7FA;
+  }
+  a { text-decoration: none; color: #C0C7D1; }
+  button { cursor: pointer; }
+  h1,h2 { margin: 0.5em 0; }
+  .container { max-width: 600px; margin: auto; padding: 20px; }
+
+  /* ----- HERO SECTION ----- */
+  #hero { text-align:center; padding: 30px 10px; }
+  #hero h1 { font-size: 2em; color: #C0C7D1; }
+  #hero p { font-size: 1em; opacity:0.8; }
+
+  /* ----- PRODUCTS ----- */
+  .product { background: rgba(192,199,209,0.05); padding:15px; margin:10px 0; border-radius:10px; }
+  .locked { opacity:0.4; pointer-events:none; }
+
+  /* ----- EMAIL CAPTURE ----- */
+  #emailForm { text-align:center; margin: 20px 0; }
+  #emailForm input[type="email"] { padding:10px; width:80%; max-width:300px; border-radius:5px; border:none; margin-bottom:10px; }
+  #emailForm button { padding:10px 20px; border:none; border-radius:5px; background:#C0C7D1; color:#0B1C2D; }
+
+  /* ----- REVIEWS ----- */
+  #reviews { margin-top:30px; }
+  .review { background: rgba(192,199,209,0.05); padding:10px; margin:5px 0; border-radius:8px; }
+  .adminReply { font-size:0.9em; opacity:0.8; margin-left:10px; }
+
+  /* ----- ADMIN PANEL ----- */
+  #adminPanel { display:none; margin-top:30px; background: rgba(192,199,209,0.05); padding:15px; border-radius:10px; }
+  #adminPanel h2 { margin-top:0; }
+  #adminPanel button { margin:5px 0; width:100%; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO SECTION -->
+  <div id="hero">
+    <h1>Built Different</h1>
+    <p>Calm Discipline. Daily Reset.</p>
+  </div>
+
+  <!-- PRODUCTS -->
+  <h2>Products</h2>
+  <div id="products"></div>
+
+  <!-- EMAIL CAPTURE -->
+  <div id="emailForm">
+    <input type="email" id="emailInput" placeholder="Enter your email">
+    <br>
+    <button onclick="submitEmail()">Join Email List</button>
+  </div>
+
+  <!-- REVIEWS -->
+  <h2>Reviews</h2>
+  <div id="reviews"></div>
+  <input type="text" id="reviewInput" placeholder="Leave a review">
+  <button onclick="submitReview()">Submit Review</button>
+
+  <!-- ADMIN LOGIN -->
+  <h2>Admin Login</h2>
+  <input type="password" id="adminPass" placeholder="Enter password">
+  <button onclick="loginAdmin()">Login</button>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <button onclick="toggleProductLock(0)">Toggle Product 1 Lock</button>
+    <button onclick="toggleProductLock(1)">Toggle Product 2 Lock</button>
+    <button onclick="toggleProductLock(2)">Toggle Product 3 Lock</button>
+    <h3>Review Moderation</h3>
+    <div id="adminReviews"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- PRODUCT DATA ---------------- */
+let products = [
+  {name:"30-Day Discipline Guide", locked:true, gumroadLink:"#"},
+  {name:"Morning Routine Blueprint", locked:true, gumroadLink:"#"},
+  {name:"Habit Tracker PDF", locked:true, gumroadLink:"#"}
+];
+
+/* ---------------- REVIEWS ---------------- */
+let reviews = [];
+
+/* ---------------- RENDER PRODUCTS ---------------- */
+function renderProducts(){
+  const prodDiv = document.getElementById("products");
+  prodDiv.innerHTML = "";
+  products.forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.className="product" + (p.locked ? " locked" : "");
+    div.innerHTML=`<strong>${p.name}</strong><br>
+                   <a href="${p.gumroadLink}" target="_blank">Buy Now</a>
+                   ${p.locked ? "<br><em>Coming Soon</em>":""}`;
+    prodDiv.appendChild(div);
+  });
+}
+renderProducts();
+
+/* ---------------- EMAIL CAPTURE ---------------- */
+function submitEmail(){
+  const email = document.getElementById("emailInput").value;
+  if(!email){ alert("Enter email"); return; }
+  // Send email notification to business email
+  window.open(`mailto:kg12yfs@gmail.com?subject=New Email Sign-up&body=${email}`);
+  alert("Thank you! Email submitted.");
+  document.getElementById("emailInput").value="";
+}
+
+/* ---------------- REVIEWS ---------------- */
+function renderReviews(){
+  const revDiv = document.getElementById("reviews");
+  revDiv.innerHTML="";
+  reviews.forEach((r,i)=>{
+    let reply = r.reply ? `<div class="adminReply">Admin: ${r.reply}</div>` : "";
+    revDiv.innerHTML+=`<div class="review">${r.text}${reply}</div>`;
+  });
+  renderAdminReviews();
+}
+
+function submitReview(){
+  const reviewText = document.getElementById("reviewInput").value;
+  if(!reviewText){ alert("Enter review"); return; }
+  reviews.push({text:reviewText, reply:null});
+  document.getElementById("reviewInput").value="";
+  renderReviews();
+}
+
+/* ---------------- ADMIN LOGIN ---------------- */
+let adminLogged=false;
+const adminPassword = "built123"; // change this to your secret password
+
+function loginAdmin(){
+  const pass = document.getElementById("adminPass").value;
+  if(pass===adminPassword){
+    adminLogged=true;
+    document.getElementById("adminPanel").style.display="block";
+    alert("Admin logged in!");
+  } else alert("Wrong password");
+}
+
+/* ---------------- ADMIN FUNCTIONS ---------------- */
+function toggleProductLock(index){
+  if(!adminLogged) return alert("Not admin");
+  products[index].locked=!products[index].locked;
+  renderProducts();
+}
+
+function renderAdminReviews(){
+  const adminDiv = document.getElementById("adminReviews");
+  adminDiv.innerHTML="";
+  reviews.forEach((r,i)=>{
+    const div = document.createElement("div");
+    div.style.margin="5px 0";
+    div.innerHTML=`${r.text} <button onclick="replyReview(${i})">Reply</button> <button onclick="deleteReview(${i})">Delete</button>`;
+    adminDiv.appendChild(div);
+  });
+}
+
+function replyReview(index){
+  const reply = prompt("Enter your reply:");
+  if(reply!==null){ reviews[index].reply=reply; renderReviews(); }
+}
+
+function deleteReview(index){
+  if(confirm("Delete this review?")){ reviews.splice(index,1); renderReviews(); }
+}
+
+</script>
+</body>
+</html>
